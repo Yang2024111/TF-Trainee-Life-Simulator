@@ -84,7 +84,7 @@ const state = {
   infoTab: "feed",
   mode: "train",
   stageFocus: "vocal",
-  concertPlan: { song: "strong", position: "group", part: "steady" },
+  concertPlan: { song: null, position: null, part: null },
   selectedId: "zhang_hanrui",
   month: 0,
   actionNo: 1,
@@ -125,7 +125,7 @@ function init() {
   state.infoTab = "feed";
   state.mode = "train";
   state.stageFocus = "vocal";
-  state.concertPlan = { song: "strong", position: "group", part: "steady" };
+  state.concertPlan = { song: null, position: null, part: null };
   state.selectedId = "zhang_hanrui";
   state.month = 0;
   state.actionNo = 1;
@@ -256,13 +256,16 @@ function applyStageFocus(person) {
 
 function applyConcertPlan(person) {
   if (!isPerformanceMonth()) return;
-  const songBonus = { strong: 1.08, challenge: 1.16, collab: 1.1 }[state.concertPlan.song];
-  const positionRisk = { center: 4, group: 0, edge: -2 }[state.concertPlan.position];
-  const partBonus = { highlight: 2.4, steady: 1.1, harmony: 1.5 }[state.concertPlan.part];
+  const song = state.concertPlan.song || "strong";
+  const position = state.concertPlan.position || "group";
+  const part = state.concertPlan.part || "steady";
+  const songBonus = { strong: 1.08, challenge: 1.16, collab: 1.1 }[song];
+  const positionRisk = { center: 4, group: 0, edge: -2 }[position];
+  const partBonus = { highlight: 2.4, steady: 1.1, harmony: 1.5 }[part];
   const gain = Math.round((person.stats[state.stageFocus] * 18 + partBonus * 360) * songBonus);
-  addFans(person, gain, state.concertPlan.song === "collab" ? "cp" : "career");
-  person.stats.risk = clamp(person.stats.risk + positionRisk + (state.concertPlan.song === "challenge" ? 2 : 0), 0, 100);
-  if (state.concertPlan.song === "collab") {
+  addFans(person, gain, song === "collab" ? "cp" : "career");
+  person.stats.risk = clamp(person.stats.risk + positionRisk + (song === "challenge" ? 2 : 0), 0, 100);
+  if (song === "collab") {
     person.cpHeat = clamp(person.cpHeat + 5, 0, 100);
   }
   state.feed.unshift({ title: "演唱会筹备", text: `选曲/站位/part 结算，粉丝 +${gain.toLocaleString()}，风险 ${positionRisk >= 0 ? "+" : ""}${positionRisk}。` });
@@ -323,6 +326,7 @@ function advanceMonth() {
   state.eventDone = false;
   state.randomHandled = false;
   state.stageFocus = "vocal";
+  state.concertPlan = { song: null, position: null, part: null };
   if (state.month >= TOTAL_MONTHS) {
     state.month = TOTAL_MONTHS - 1;
     state.view = "result";
@@ -541,7 +545,10 @@ function renderStageFocus() {
   `;
   panel.querySelectorAll("button").forEach((button) => {
     const plan = button.closest(".plan-options")?.dataset.plan;
-    button.classList.toggle("active", button.dataset.focus === state.stageFocus || (plan && state.concertPlan[plan] === button.dataset.value));
+    const isActive = button.dataset.focus
+      ? button.dataset.focus === state.stageFocus
+      : Boolean(plan && state.concertPlan[plan] && state.concertPlan[plan] === button.dataset.value);
+    button.classList.toggle("active", isActive);
     button.addEventListener("click", () => {
       if (button.dataset.focus) state.stageFocus = button.dataset.focus;
       if (plan) state.concertPlan[plan] = button.dataset.value;

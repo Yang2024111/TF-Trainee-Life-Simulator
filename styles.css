@@ -10,14 +10,17 @@
 
 * { box-sizing: border-box; }
 
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  display: grid;
-  place-items: center;
   background: #111722;
   color: var(--ink);
   font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 button { font: inherit; cursor: pointer; }
@@ -25,9 +28,10 @@ button { font: inherit; cursor: pointer; }
 .phone-shell {
   position: relative;
   width: min(100vw, 430px);
-  height: 100vh;
-  max-height: 932px;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: visible;
+  margin: 0 auto;
   background:
     linear-gradient(180deg, rgba(3, 8, 18, 0.2), rgba(3, 8, 18, 0.84)),
     url("./assets/trainee-key-art.png") center/cover;
@@ -35,9 +39,9 @@ button { font: inherit; cursor: pointer; }
 }
 
 .status-bar {
-  position: absolute;
+  position: sticky;
   z-index: 10;
-  inset: 0 0 auto;
+  top: 0;
   height: 54px;
   display: grid;
   grid-template-columns: 58px 1fr 58px;
@@ -64,9 +68,11 @@ button { font: inherit; cursor: pointer; }
 
 .view {
   display: none;
-  position: absolute;
-  inset: 54px 0 0;
+  position: relative;
+  min-height: calc(100vh - 54px);
+  min-height: calc(100svh - 54px);
   padding: 14px;
+  padding-bottom: 18px;
 }
 
 .view.active { display: block; }
@@ -132,10 +138,13 @@ h1, h2 {
 .roster-card small { display: block; margin-top: 4px; color: var(--muted); }
 
 .bottom-primary {
-  position: absolute;
-  left: 14px;
-  right: 14px;
+  position: sticky;
+  left: 0;
+  right: 0;
   bottom: 16px;
+  z-index: 5;
+  width: 100%;
+  margin-top: 14px;
   height: 50px;
   border: 0;
   border-radius: 14px;
@@ -504,5 +513,5 @@ h1, h2 {
 }
 
 @media (min-width: 431px) {
-  .phone-shell { border-radius: 28px; height: 932px; }
+  .phone-shell { border-radius: 28px; min-height: 932px; }
 }
